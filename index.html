@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catálogo Lunático Records</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* Plan: papel lila frío + tinta violeta + amarillo luna como único acento; verde solo para WhatsApp.
+   Idea de layout: portadas grandes como protagonistas, texto mínimo, todo operable con el pulgar. */
+:root{
+  --bg:#EFEDF5; --surface:#FFFFFF; --ink:#1C1833; --muted:#645F80; --line:#DAD6E6;
+  --accent:#F0B429; --on-accent:#1C1833; --wa:#14803F; --on-wa:#FFFFFF;
+  --sold:#8A86A3;
+  --font-display:"Syne","Trebuchet MS",sans-serif;
+  --font-body:"Hanken Grotesk","Segoe UI",system-ui,sans-serif;
+  --shadow:0 1px 2px rgba(28,24,51,.08),0 6px 18px rgba(28,24,51,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#14112A; --surface:#201C3D; --ink:#F2EFFB; --muted:#A8A2C8; --line:#3A3562;
+    --sold:#7F7AA0; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.28);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#14112A; --surface:#201C3D; --ink:#F2EFFB; --muted:#A8A2C8; --line:#3A3562;
+  --sold:#7F7AA0; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 var(--font-body);min-height:100%}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+
+/* barra superior */
+.top{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:10px;padding-bottom:10px}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:800;font-size:20px;letter-spacing:.01em}
+.brand svg{flex:none}
+.brand span{white-space:nowrap}
+.brand small{font:600 11px var(--font-body);color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+@media(max-width:520px){.brand small{display:none}}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tabs button{border:0;background:transparent;border-radius:999px;padding:7px 12px;font-weight:600;font-size:14px;color:var(--muted)}
+.tabs button[aria-current="page"]{background:var(--ink);color:var(--bg)}
+.ribbon{background:var(--accent);color:var(--on-accent);font-size:12.5px;font-weight:600;text-align:center;padding:5px 12px}
+
+/* cabecera de tienda */
+.store-head{display:flex;gap:16px;align-items:center;padding:22px 0 12px}
+.logo{flex:none;width:76px;height:76px;border-radius:50%;background:#1C1833;display:grid;place-items:center;box-shadow:var(--shadow)}
+.store-head h1{margin:0;font-family:var(--font-display);font-weight:800;font-size:clamp(26px,6vw,38px);line-height:1.05;text-wrap:balance}
+.store-head p{margin:4px 0 0;color:var(--muted);max-width:52ch}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:13px;color:var(--muted)}
+.meta b{color:var(--ink)}
+
+/* filtros */
+.filters{display:grid;gap:10px;padding:10px 0 14px}
+.search{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;font-size:16px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13.5px;font-weight:600;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.sel{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 10px;font-size:14px}
+.count{color:var(--muted);font-size:13px;margin:0 0 10px}
+
+/* cuadrícula de discos */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding-bottom:40px}
+@media(min-width:620px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:860px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.card{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0;overflow:hidden;box-shadow:var(--shadow);transition:transform .15s}
+.card:hover{transform:translateY(-2px)}
+.cover{position:relative;aspect-ratio:1;background:#000}
+.cover svg{display:block;width:100%;height:100%}
+.badge{position:absolute;left:8px;top:8px;background:var(--ink);color:var(--bg);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
+.card .info{padding:10px 12px 12px}
+.card .t{font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .a{color:var(--muted);font-size:13.5px;margin-top:2px}
+.card .foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
+.price{font-weight:700;font-variant-numeric:tabular-nums}
+.sold{opacity:.55}
+.sold .price{text-decoration:line-through;color:var(--sold)}
+
+/* estado del disco */
+.pill{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--c,#999)}
+.empty{padding:40px 0;text-align:center;color:var(--muted)}
+
+/* hoja de detalle */
+.scrim{position:fixed;inset:0;background:rgba(10,8,24,.55);display:none;z-index:30}
+.scrim.open{display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:620px;max-height:92%;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px 28px;position:relative}
+@media(min-width:700px){.scrim.open{align-items:center}.sheet{border-radius:20px;max-height:88%}}
+.close{position:absolute;right:12px;top:12px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:18px;line-height:1;z-index:2}
+.d-top{display:grid;gap:16px}
+@media(min-width:560px){.d-top{grid-template-columns:240px 1fr}}
+.d-cover{border-radius:12px;overflow:hidden;aspect-ratio:1;box-shadow:var(--shadow)}
+.d-cover svg{display:block;width:100%;height:100%}
+.sheet h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:26px;line-height:1.1;text-wrap:balance;padding-right:40px}
+.sheet .sub{color:var(--muted);margin:4px 0 12px}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 14px;font-size:14px}
+.facts dt{color:var(--muted)}
+.facts dd{margin:0;font-weight:600}
+.big-price{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;margin:0 0 12px}
+.wa{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--wa);color:var(--on-wa);border:0;border-radius:12px;padding:12px 18px;font-weight:700;text-decoration:none;font-size:15px}
+.wa.block{width:100%}
+.wa.small{padding:8px 12px;font-size:13.5px;border-radius:10px}
+.wa[aria-disabled="true"]{background:var(--sold);pointer-events:none}
+h3{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px}
+.tracks{margin:0;padding-left:20px;columns:1;font-size:14px}
+@media(min-width:560px){.tracks{columns:2;column-gap:24px}}
+.tracks li{break-inside:avoid;padding:1px 0}
+.others{display:grid;gap:8px}
+.other{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.other b{display:block}
+.other span{color:var(--muted);font-size:13px}
+
+/* directorio */
+.hero{padding:26px 0 8px}
+.hero h1{margin:0 0 6px;font-family:var(--font-display);font-weight:800;font-size:clamp(26px,6vw,38px);line-height:1.08;text-wrap:balance}
+.hero p{margin:0 0 14px;color:var(--muted);max-width:56ch}
+.stores{display:flex;gap:10px;overflow-x:auto;padding:4px 0 12px;scroll-snap-type:x proximity}
+.store-card{flex:none;scroll-snap-align:start;width:150px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:left;box-shadow:var(--shadow)}
+.store-card[aria-pressed="true"]{outline:3px solid var(--accent)}
+.store-card .mini{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-display);font-weight:800;color:#fff;margin-bottom:8px}
+.store-card b{display:block;line-height:1.2}
+.store-card span{font-size:12.5px;color:var(--muted)}
+.results{display:grid;gap:10px;padding-bottom:40px}
+.res{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px}
+.res .mc{width:64px;height:64px;border-radius:8px;overflow:hidden}
+.res .mc svg{display:block;width:100%;height:100%}
+.res .tt{font-weight:700;line-height:1.2}
+.res .ss{color:var(--muted);font-size:13px}
+.res .pp{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.res button.link{background:none;border:0;padding:0;text-align:left;color:inherit}
+.tag{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:1px 5px;margin-left:6px;vertical-align:1px}
+@media(max-width:480px){.res{grid-template-columns:56px 1fr}.res .mc{width:56px;height:56px}.res .pp{grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:space-between}}
+
+/* panel del vendedor */
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0 16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.tile b{display:block;font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.tile span{font-size:12.5px;color:var(--muted)}
+.upload{border:2px dashed var(--line);border-radius:14px;padding:16px;background:var(--surface);display:grid;gap:8px}
+.upload p{margin:0;color:var(--muted);font-size:14px}
+.btn{display:inline-block;background:var(--ink);color:var(--bg);border:0;border-radius:10px;padding:9px 14px;font-weight:700;font-size:14px;width:max-content}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface);margin-bottom:40px}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+.tgl{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-weight:700;font-size:12.5px}
+.tgl[aria-pressed="true"]{background:var(--sold);border-color:var(--sold);color:#fff}
+.note{color:var(--muted);font-size:12.5px;margin:0 0 24px}
+.hidden{display:none !important}
+@media(prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><defs><mask id="m"><rect width="26" height="26" fill="#fff"/><circle cx="17" cy="10" r="9" fill="#000"/></mask></defs><circle cx="13" cy="13" r="11" fill="#F0B429" mask="url(#m)"/></svg>
+      <span>Surcos <small>nombre provisional</small></span>
+    </div>
+    <nav class="tabs" aria-label="Secciones">
+      <button type="button" data-view="tienda">Tienda</button>
+      <button type="button" data-view="directorio">Directorio</button>
+      <button type="button" data-view="panel">Panel</button>
+    </nav>
+  </div>
+  <div class="ribbon">Prototipo con datos y portadas de ejemplo. En el sistema real las portadas se completan solas.</div>
+</header>
+
+<main class="wrap">
+
+<!-- TIENDA -->
+<section id="v-tienda" aria-labelledby="h-tienda">
+  <div class="store-head">
+    <div class="logo" aria-hidden="true">
+      <svg width="46" height="46" viewBox="0 0 46 46"><defs><mask id="m2"><rect width="46" height="46" fill="#fff"/><circle cx="30" cy="17" r="16" fill="#000"/></mask></defs><circle cx="23" cy="23" r="19" fill="#F0B429" mask="url(#m2)"/></svg>
+    </div>
+    <div>
+      <h1 id="h-tienda">Lunático Records</h1>
+      <p>Vinilos nuevos y usados, revisados disco por disco. Lima. Envíos a todo el Perú.</p>
+      <div class="meta"><span><b id="n-activos">0</b> discos disponibles</span><span>Coordinación por WhatsApp</span></div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input id="q" class="search" type="search" placeholder="Buscar disco o artista" aria-label="Buscar disco o artista">
+    <div class="row" id="genres" role="group" aria-label="Género"></div>
+    <div class="row">
+      <label class="sr"><select id="cond" class="sel" aria-label="Estado del vinilo">
+        <option value="">Cualquier estado</option><option value="M">Mint (M)</option><option value="NM">Near Mint (NM)</option><option value="VG+">Very Good+ (VG+)</option><option value="VG">Very Good (VG)</option>
+      </select></label>
+      <select id="rango" class="sel" aria-label="Rango de precio">
+        <option value="">Cualquier precio</option><option value="0-150">Hasta S/ 150</option><option value="150-250">S/ 150 a 250</option><option value="250-9999">Más de S/ 250</option>
+      </select>
+      <select id="orden" class="sel" aria-label="Ordenar">
+        <option value="nuevo">Recién llegados</option><option value="precio-asc">Precio: menor a mayor</option><option value="precio-desc">Precio: mayor a menor</option><option value="anio">Año: más antiguo</option>
+      </select>
+    </div>
+  </div>
+  <p class="count" id="count" aria-live="polite"></p>
+  <div class="grid" id="grid"></div>
+</section>
+
+<!-- DIRECTORIO -->
+<section id="v-directorio" class="hidden" aria-labelledby="h-dir">
+  <div class="hero">
+    <h1 id="h-dir">Encuentra tu disco en todas las tiendas de Lima</h1>
+    <p>Busca por disco, artista o tienda. Compara precio y estado, y escribe directo al vendedor.</p>
+    <input id="dq" class="search" type="search" value="Thriller" placeholder="Buscar disco, artista o tienda" aria-label="Buscar en todas las tiendas">
+  </div>
+  <div class="stores" id="stores" role="group" aria-label="Tiendas"></div>
+  <div class="row" style="margin:4px 0 12px;align-items:center">
+    <select id="dorden" class="sel" aria-label="Ordenar resultados">
+      <option value="precio">Menor precio primero</option><option value="estado">Mejor estado primero</option>
+    </select>
+    <span class="count" id="dcount" style="margin:0" aria-live="polite"></span>
+  </div>
+  <div class="results" id="results"></div>
+</section>
+
+<!-- PANEL -->
+<section id="v-panel" class="hidden" aria-labelledby="h-panel">
+  <div class="hero">
+    <h1 id="h-panel">Panel de Lunático Records</h1>
+    <p>Sube tu inventario, marca lo que se vende y mira qué discos despiertan interés.</p>
+  </div>
+  <div class="tiles">
+    <div class="tile"><b id="t-act">0</b><span>Discos activos</span></div>
+    <div class="tile"><b id="t-vis">0</b><span>Visitas en 7 días</span></div>
+    <div class="tile"><b id="t-wa">0</b><span>Clics a WhatsApp</span></div>
+  </div>
+  <div class="upload">
+    <b>Cargar inventario desde Excel</b>
+    <p>Columnas mínimas: artista, disco, estado del vinilo, estado de la carátula, precio. Las portadas, el año, el sello y el tracklist se completan automáticamente.</p>
+    <input id="file" type="file" accept=".xlsx,.xls,.csv" class="hidden">
+    <button type="button" class="btn" id="pick">Elegir archivo</button>
+    <p id="fileMsg" aria-live="polite"></p>
+  </div>
+  <h3>Mis discos</h3>
+  <div class="tablebox">
+    <table>
+      <thead><tr><th>Disco</th><th>Estado</th><th class="n">Precio</th><th class="n">Visitas</th><th class="n">WhatsApp</th><th>Vendido</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <p class="note">Visitas y clics son cifras de ejemplo. Al marcar un disco como vendido, se actualiza en la tienda y en el directorio de esta página.</p>
+</section>
+
+</main>
+
+<div class="scrim" id="scrim">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="s-title" id="sheet">
+    <button type="button" class="close" id="close" aria-label="Cerrar">&times;</button>
+    <div id="sheet-body"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var STORES = [
+    {id:'lun', name:'Lunático Records', zone:'Lima', color:'#1C1833', own:true},
+    {id:'sur', name:'Discos del Sur', zone:'Surco', color:'#2F6F8F'},
+    {id:'cas', name:'Casa Vinilo', zone:'Miraflores', color:'#A5493A'},
+    {id:'cri', name:'Cripta Sonora', zone:'Breña', color:'#5D4A9C'}
+  ];
+  function T(id){return STORES.filter(function(s){return s.id===id})[0]}
+
+  var TR = {
+    'Thriller':['Wanna Be Startin’ Somethin’','Baby Be Mine','The Girl Is Mine','Thriller','Beat It','Billie Jean','Human Nature','P.Y.T. (Pretty Young Thing)','The Lady in My Life'],
+    'The Dark Side of the Moon':['Speak to Me / Breathe','On the Run','Time','The Great Gig in the Sky','Money','Us and Them','Any Colour You Like','Brain Damage','Eclipse']
+  };
+
+  // id, tienda, artista, disco, año, sello, género, estado vinilo, estado carátula, precio, prensado, paleta, forma, visitas, clics, orden de llegada
+  var D = [
+    d(1,'lun','Michael Jackson','Thriller',1982,'Epic','Pop','VG+','VG+',180,'EE. UU.',['#B3262D','#1C1833'],0,142,23,12),
+    d(2,'lun','Pink Floyd','The Dark Side of the Moon',1973,'Harvest','Rock','VG+','VG',290,'Reino Unido',['#1C1833','#8E5CC9'],2,201,37,11),
+    d(3,'lun','The Beatles','Abbey Road',1969,'Apple','Rock','VG','VG',240,'Reino Unido',['#2F6F8F','#F2E7C9'],1,118,19,10),
+    d(4,'lun','Fleetwood Mac','Rumours',1977,'Warner Bros.','Rock','NM','VG+',210,'EE. UU.',['#D98E2B','#3A2417'],3,96,14,9),
+    d(5,'lun','Nirvana','Nevermind',1991,'DGC','Rock','NM','NM',260,'EE. UU.',['#2B7FB8','#F0B429'],4,174,31,8),
+    d(6,'lun','Miles Davis','Kind of Blue',1959,'Columbia','Jazz','VG+','VG+',340,'EE. UU.',['#173B6B','#5FA3D9'],1,88,12,7),
+    d(7,'lun','Soda Stereo','Dynamo',1992,'Sony Music','Rock en español','NM','NM',150,'Argentina',['#C7372F','#F0B429'],3,131,26,6),
+    d(8,'lun','Led Zeppelin','IV',1971,'Atlantic','Rock','VG','VG+',320,'Reino Unido',['#4B4B58','#D8D3C4'],2,109,17,5),
+    d(9,'lun','David Bowie','The Rise and Fall of Ziggy Stardust',1972,'RCA','Rock','VG+','VG+',270,'Reino Unido',['#E0553B','#2A1A4F'],0,92,15,4),
+    d(10,'lun','Daft Punk','Random Access Memories',2013,'Columbia','Electrónica','M','M',230,'EE. UU.',['#C9A24B','#14112A'],4,155,29,3),
+    d(11,'lun','Radiohead','OK Computer',1997,'Parlophone','Rock','NM','VG+',280,'Reino Unido',['#3D8F86','#E7E3D5'],1,121,20,2),
+    d(12,'lun','Stevie Wonder','Songs in the Key of Life',1976,'Tamla','Soul y funk','VG+','VG',250,'EE. UU.',['#7B5CD6','#F0B429'],3,77,11,1),
+
+    d(21,'sur','Michael Jackson','Thriller',1982,'Epic','Pop','VG','VG',140,'Brasil',['#B3262D','#1C1833'],0,0,0,0),
+    d(22,'cas','Michael Jackson','Thriller',1982,'Epic','Pop','NM','VG+',230,'EE. UU.',['#B3262D','#1C1833'],0,0,0,0),
+    d(23,'cas','Pink Floyd','The Dark Side of the Moon',1973,'Harvest','Rock','NM','VG+',360,'Reino Unido',['#1C1833','#8E5CC9'],2,0,0,0),
+    d(24,'cri','Nirvana','Nevermind',1991,'DGC','Rock','VG+','VG+',200,'EE. UU.',['#2B7FB8','#F0B429'],4,0,0,0),
+    d(25,'sur','Fleetwood Mac','Rumours',1977,'Warner Bros.','Rock','VG','VG',120,'EE. UU.',['#D98E2B','#3A2417'],3,0,0,0),
+    d(26,'cri','Miles Davis','Kind of Blue',1959,'Columbia','Jazz','VG+','VG',310,'EE. UU.',['#173B6B','#5FA3D9'],1,0,0,0),
+    d(27,'cas','The Beatles','Abbey Road',1969,'Apple','Rock','VG+','VG+',300,'Reino Unido',['#2F6F8F','#F2E7C9'],1,0,0,0)
+  ];
+  function d(id,store,artist,title,year,label,genre,vinyl,sleeve,price,press,c,shape,views,clicks,ord){
+    return {id:id,store:store,artist:artist,title:title,year:year,label:label,genre:genre,vinyl:vinyl,sleeve:sleeve,price:price,press:press,c:c,shape:shape,views:views,clicks:clicks,ord:ord,tracks:TR[title]||null,sold:false};
+  }
+  var RANK = {'M':4,'NM':3,'VG+':2,'VG':1};
+  var CCOL = {'M':'#7B5CD6','NM':'#2E9E6B','VG+':'#3B82C4','VG':'#C98A1B'};
+
+  function $(s){return document.querySelector(s)}
+  function money(n){return 'S/ '+n.toLocaleString('es-PE')}
+  function pill(c){return '<span class="pill" style="--c:'+CCOL[c]+'"><i></i>'+c+'</span>'}
+
+  function cover(x){
+    var a=x.c[0], b=x.c[1], s='';
+    if(x.shape===0){ s='<circle cx="100" cy="100" r="78" fill="'+b+'"/><circle cx="100" cy="100" r="54" fill="'+a+'"/><circle cx="100" cy="100" r="28" fill="'+b+'"/><circle cx="100" cy="100" r="8" fill="'+a+'"/>'; }
+    if(x.shape===1){ for(var i=0;i<6;i++){ s+='<rect x="0" y="'+(i*34)+'" width="200" height="17" fill="'+b+'"/>'; } s+='<circle cx="140" cy="62" r="26" fill="'+a+'"/>'; }
+    if(x.shape===2){ s='<polygon points="100,28 172,160 28,160" fill="'+b+'"/><polygon points="100,68 142,144 58,144" fill="'+a+'"/>'; }
+    if(x.shape===3){ s='<circle cx="100" cy="150" r="84" fill="'+b+'"/><circle cx="100" cy="150" r="58" fill="'+a+'"/><circle cx="100" cy="150" r="32" fill="'+b+'"/>'; }
+    if(x.shape===4){ for(var r=0;r<5;r++){ for(var k=0;k<5;k++){ s+='<circle cx="'+(30+k*35)+'" cy="'+(30+r*35)+'" r="'+(6+((r+k)%3)*4)+'" fill="'+b+'"/>'; } } }
+    return '<svg viewBox="0 0 200 200" role="img" aria-label="Portada de ejemplo de '+x.title+'" preserveAspectRatio="xMidYMid slice"><rect width="200" height="200" fill="'+a+'"/>'+s+'</svg>';
+  }
+  function waLink(x){
+    var msg='Hola '+T(x.store).name+', me interesa "'+x.title+'" de '+x.artist+' ('+x.vinyl+') a '+money(x.price)+'. ¿Sigue disponible?';
+    return 'https://wa.me/?text='+encodeURIComponent(msg);
+  }
+  function waBtn(x,cls,label){
+    if(x.sold) return '<a class="wa '+cls+'" aria-disabled="true" tabindex="-1">Vendido</a>';
+    return '<a class="wa '+cls+'" href="'+waLink(x)+'" target="_blank" rel="noopener" data-wa="'+x.id+'">'+(label||'Lo quiero')+'</a>';
+  }
+
+  /* ---------- TIENDA ---------- */
+  var gen='Todos', GENRES=['Todos','Rock','Pop','Jazz','Rock en español','Electrónica','Soul y funk'];
+  function renderGenres(){
+    $('#genres').innerHTML=GENRES.map(function(g){return '<button type="button" class="chip" data-g="'+g+'" aria-pressed="'+(g===gen)+'">'+g+'</button>'}).join('');
+  }
+  function renderTienda(){
+    var q=$('#q').value.trim().toLowerCase(), cond=$('#cond').value, rg=$('#rango').value, ord=$('#orden').value;
+    var list=D.filter(function(x){return x.store==='lun'});
+    $('#n-activos').textContent=list.filter(function(x){return !x.sold}).length;
+    list=list.filter(function(x){
+      if(gen!=='Todos' && x.genre!==gen) return false;
+      if(cond && x.vinyl!==cond) return false;
+      if(rg){var p=rg.split('-');if(x.price<+p[0]||x.price>+p[1]) return false;}
+      if(q && (x.title+' '+x.artist).toLowerCase().indexOf(q)<0) return false;
+      return true;
+    });
+    list.sort(function(a,b){
+      if(ord==='precio-asc') return a.price-b.price;
+      if(ord==='precio-desc') return b.price-a.price;
+      if(ord==='anio') return a.year-b.year;
+      return b.ord-a.ord;
+    });
+    $('#count').textContent=list.length+(list.length===1?' disco':' discos');
+    $('#grid').innerHTML=list.length?list.map(function(x){
+      return '<button type="button" class="card'+(x.sold?' sold':'')+'" data-open="'+x.id+'"><div class="cover">'+cover(x)+(x.sold?'<span class="badge">Vendido</span>':'')+'</div><div class="info"><div class="t">'+x.title+'</div><div class="a">'+x.artist+' · '+x.year+'</div><div class="foot"><span class="price">'+money(x.price)+'</span>'+pill(x.vinyl)+'</div></div></button>';
+    }).join(''):'<div class="empty" style="grid-column:1/-1">Ningún disco coincide con esos filtros.</div>';
+  }
+
+  /* ---------- DETALLE ---------- */
+  var lastFocus=null;
+  function openDisc(id){
+    var x=D.filter(function(z){return z.id===id})[0]; if(!x) return;
+    var others=D.filter(function(z){return z.id!==x.id && z.title===x.title && z.artist===x.artist && !z.sold})
+                .sort(function(a,b){return a.price-b.price});
+    var h='<div class="d-top"><div class="d-cover">'+cover(x)+'</div><div>'+
+      '<h2 id="s-title">'+x.title+'</h2><p class="sub">'+x.artist+'</p>'+
+      '<dl class="facts"><dt>Año</dt><dd>'+x.year+'</dd><dt>Sello</dt><dd>'+x.label+'</dd><dt>Prensado</dt><dd>'+x.press+'</dd><dt>Vinilo</dt><dd>'+pill(x.vinyl)+'</dd><dt>Carátula</dt><dd>'+pill(x.sleeve)+'</dd><dt>Tienda</dt><dd>'+T(x.store).name+'</dd></dl>'+
+      '<p class="big-price">'+money(x.price)+'</p>'+waBtn(x,'block','Lo quiero, escribir por WhatsApp')+
+      '</div></div>';
+    if(x.tracks){ h+='<h3>Tracklist</h3><ol class="tracks">'+x.tracks.map(function(t){return '<li>'+t+'</li>'}).join('')+'</ol>'; }
+    h+='<h3>Otras copias en otras tiendas</h3>';
+    h+= others.length ? '<div class="others">'+others.map(function(o){
+      return '<div class="other"><div><b>'+T(o.store).name+' <span class="tag">ejemplo</span></b><span>Vinilo '+o.vinyl+' · Carátula '+o.sleeve+'</span></div><div style="text-align:right"><div class="price">'+money(o.price)+'</div>'+waBtn(o,'small','WhatsApp')+'</div></div>';
+    }).join('')+'</div>' : '<p class="note" style="margin:0">No hay otras copias disponibles ahora.</p>';
+    $('#sheet-body').innerHTML=h;
+    lastFocus=document.activeElement;
+    $('#scrim').classList.add('open');
+    $('#sheet').scrollTop=0;
+    $('#close').focus();
+  }
+  function closeSheet(){
+    $('#scrim').classList.remove('open');
+    if(lastFocus&&lastFocus.focus) lastFocus.focus();
+  }
+
+  /* ---------- DIRECTORIO ---------- */
+  var storeFilter='';
+  function renderStores(){
+    $('#stores').innerHTML=STORES.map(function(s){
+      var n=D.filter(function(x){return x.store===s.id&&!x.sold}).length;
+      return '<button type="button" class="store-card" data-store="'+s.id+'" aria-pressed="'+(storeFilter===s.id)+'"><div class="mini" style="background:'+s.color+'">'+s.name.charAt(0)+'</div><b>'+s.name+'</b><span>'+s.zone+' · '+n+' discos'+(s.own?'':' · ejemplo')+'</span></button>';
+    }).join('');
+  }
+  function renderDir(){
+    var q=$('#dq').value.trim().toLowerCase(), ord=$('#dorden').value;
+    var list=D.filter(function(x){
+      if(storeFilter && x.store!==storeFilter) return false;
+      if(!q) return true;
+      return (x.title+' '+x.artist+' '+T(x.store).name).toLowerCase().indexOf(q)>=0;
+    });
+    list.sort(function(a,b){
+      if(a.sold!==b.sold) return a.sold?1:-1;
+      if(ord==='estado'){ var r=RANK[b.vinyl]-RANK[a.vinyl]; return r||a.price-b.price; }
+      return a.price-b.price;
+    });
+    $('#dcount').textContent=list.length+(list.length===1?' resultado':' resultados');
+    $('#results').innerHTML=list.length?list.map(function(x){
+      var st=T(x.store);
+      return '<div class="res'+(x.sold?' sold':'')+'"><div class="mc">'+cover(x)+'</div><div><button type="button" class="link" data-open="'+x.id+'"><div class="tt">'+x.title+'</div></button><div class="ss">'+x.artist+' · '+x.year+'</div><div class="ss"><b style="color:var(--ink)">'+st.name+'</b>'+(st.own?'':'<span class="tag">ejemplo</span>')+'</div><div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">'+pill(x.vinyl)+'<span class="ss">carátula '+x.sleeve+'</span></div></div><div class="pp"><span class="price">'+money(x.price)+'</span>'+waBtn(x,'small','WhatsApp')+'</div></div>';
+    }).join(''):'<div class="empty">No encontramos ese disco. Prueba con el nombre del artista.</div>';
+  }
+
+  /* ---------- PANEL ---------- */
+  function renderPanel(){
+    var mine=D.filter(function(x){return x.store==='lun'});
+    $('#t-act').textContent=mine.filter(function(x){return !x.sold}).length;
+    $('#t-vis').textContent=mine.reduce(function(s,x){return s+x.views},0).toLocaleString('es-PE');
+    $('#t-wa').textContent=mine.reduce(function(s,x){return s+x.clicks},0).toLocaleString('es-PE');
+    $('#tbody').innerHTML=mine.map(function(x){
+      return '<tr><td><b>'+x.title+'</b><div class="ss" style="color:var(--muted);font-size:12.5px">'+x.artist+'</div></td><td>'+pill(x.vinyl)+'</td><td class="n">'+money(x.price)+'</td><td class="n">'+x.views+'</td><td class="n">'+x.clicks+'</td><td><button type="button" class="tgl" data-sold="'+x.id+'" aria-pressed="'+x.sold+'">'+(x.sold?'Vendido':'Marcar')+'</button></td></tr>';
+    }).join('');
+  }
+
+  /* ---------- NAVEGACIÓN ---------- */
+  var VIEWS=['tienda','directorio','panel'];
+  function show(v){
+    if(VIEWS.indexOf(v)<0) v='tienda';
+    VIEWS.forEach(function(n){ $('#v-'+n).classList.toggle('hidden',n!==v); });
+    document.querySelectorAll('.tabs button').forEach(function(b){
+      if(b.getAttribute('data-view')===v) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+    });
+    if(v==='directorio'){renderStores();renderDir();}
+    if(v==='panel') renderPanel();
+    if(v==='tienda') renderTienda();
+  }
+  function route(){ show((location.hash||'').replace('#','')); }
+
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('[data-view],[data-g],[data-open],[data-store],[data-sold],#pick,#close,[data-wa]'); if(!t) return;
+    if(t.hasAttribute('data-view')){ location.hash=t.getAttribute('data-view'); window.scrollTo(0,0); return; }
+    if(t.hasAttribute('data-g')){ gen=t.getAttribute('data-g'); renderGenres(); renderTienda(); return; }
+    if(t.hasAttribute('data-open')){ openDisc(+t.getAttribute('data-open')); return; }
+    if(t.hasAttribute('data-store')){ var s=t.getAttribute('data-store'); storeFilter=(storeFilter===s?'':s); renderStores(); renderDir(); return; }
+    if(t.hasAttribute('data-sold')){ var id=+t.getAttribute('data-sold'); D.forEach(function(x){ if(x.id===id) x.sold=!x.sold; }); renderPanel(); renderTienda(); return; }
+    if(t.id==='pick'){ $('#file').click(); return; }
+    if(t.id==='close'){ closeSheet(); return; }
+    if(t.hasAttribute('data-wa')){ var w=+t.getAttribute('data-wa'); D.forEach(function(x){ if(x.id===w && x.store==='lun') x.clicks++; }); return; }
+  });
+  $('#scrim').addEventListener('click',function(e){ if(e.target===this) closeSheet(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && $('#scrim').classList.contains('open')) closeSheet(); });
+  ['#q','#cond','#rango','#orden'].forEach(function(s){ $(s).addEventListener('input',renderTienda); });
+  $('#dq').addEventListener('input',renderDir);
+  $('#dorden').addEventListener('change',renderDir);
+  $('#file').addEventListener('change',function(){
+    var f=this.files&&this.files[0];
+    $('#fileMsg').textContent=f?('Archivo recibido: '+f.name+'. En el sistema real, aquí se leerían las filas y se completarían portadas y datos de cada disco.'):'';
+  });
+  window.addEventListener('hashchange',route);
+
+  renderGenres(); route();
+})();
+</script>
+</body>
+</html>
